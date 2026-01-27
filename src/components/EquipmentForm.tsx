@@ -58,7 +58,6 @@ const EquipmentForm: React.FC<EquipmentFormProps> = ({ currentUser, onClose, onS
       return;
     }
 
-    // FIX: Format the data properly with timestamp
     const submissionData = {
       ...formData,
       receivedDate: new Date().toISOString(), // Use ISO string for Supabase
@@ -161,53 +160,55 @@ const EquipmentForm: React.FC<EquipmentFormProps> = ({ currentUser, onClose, onS
             </div>
           </div>
 
-          <textarea
-            rows={3} placeholder="Describe the fault..."
-            className="w-full bg-gray-50 border border-gray-200 rounded-2xl px-5 py-4 font-bold text-sm outline-none focus:ring-2 focus:ring-blue-500 resize-none"
-            value={formData.notes}
-            onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-          />
-      </div>
-
-      <div className="grid grid-cols-2 gap-6 bg-gray-50 p-4 rounded-2xl border border-gray-100">
-        <div className="col-span-2">
-          <p className="text-[10px] uppercase font-black text-gray-400 mb-2 tracking-widest">Inventory Details (Auto-fetched)</p>
-        </div>
-        <div>
-          <label className="block text-[10px] font-black text-gray-400 uppercase mb-2 tracking-widest">SR Number</label>
-          <input
-            type="text" placeholder="Auto-filled..."
-            readOnly
-            className="w-full bg-white border border-gray-200 rounded-2xl px-5 py-4 font-bold text-sm outline-none text-gray-500 cursor-not-allowed"
-            value={formData.srNumber}
-          />
-        </div>
-        <div>
-          <label className="block text-[10px] font-black text-gray-400 uppercase mb-2 tracking-widest">Registered Owner</label>
-          <input
-            type="text" placeholder="Auto-filled..."
-            readOnly
-            className="w-full bg-white border border-gray-200 rounded-2xl px-5 py-4 font-bold text-sm outline-none text-gray-500 cursor-not-allowed"
-            value={formData.owner}
-          />
-        </div>
-      </div>
-
-      <div className="bg-blue-50 p-4 rounded-2xl flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Box className="text-blue-600" size={20} />
           <div>
-            <span className="text-[10px] font-black text-blue-900 uppercase block">Logger Identity: <span className="underline">{currentUser}</span></span>
-            <span className="text-[9px] text-blue-700 font-medium">Date: {new Date().toLocaleDateString()}</span>
+            <label className="block text-[10px] font-black text-gray-400 uppercase mb-2 tracking-widest">Detailed Issue</label>
+            <textarea
+              rows={3} placeholder="Describe the fault..."
+              className="w-full bg-gray-50 border border-gray-200 rounded-2xl px-5 py-4 font-bold text-sm outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+              value={formData.notes}
+              onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+            />
           </div>
-        </div>
-        <button type="submit" className="bg-[#006097] text-white px-8 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-blue-100 hover:scale-[1.02] transition-transform flex items-center gap-2">
-          <Save size={16} /> Generate Job Card
-        </button>
+
+          <div className="grid grid-cols-2 gap-6 bg-gray-50 p-4 rounded-2xl border border-gray-100">
+            <div className="col-span-2">
+              <p className="text-[10px] uppercase font-black text-gray-400 mb-2 tracking-widest">Inventory Details (Auto-fetched)</p>
+            </div>
+            <div>
+              <label className="block text-[10px] font-black text-gray-400 uppercase mb-2 tracking-widest">SR Number</label>
+              <input
+                type="text" placeholder="Auto-filled..."
+                readOnly
+                className="w-full bg-white border border-gray-200 rounded-2xl px-5 py-4 font-bold text-sm outline-none text-gray-500 cursor-not-allowed"
+                value={formData.srNumber}
+              />
+            </div>
+            <div>
+              <label className="block text-[10px] font-black text-gray-400 uppercase mb-2 tracking-widest">Registered Owner</label>
+              <input
+                type="text" placeholder="Auto-filled..."
+                readOnly
+                className="w-full bg-white border border-gray-200 rounded-2xl px-5 py-4 font-bold text-sm outline-none text-gray-500 cursor-not-allowed"
+                value={formData.owner}
+              />
+            </div>
+          </div>
+
+          <div className="bg-blue-50 p-4 rounded-2xl flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Box className="text-blue-600" size={20} />
+              <div>
+                <span className="text-[10px] font-black text-blue-900 uppercase block">Logger Identity: <span className="underline">{currentUser}</span></span>
+                <span className="text-[9px] text-blue-700 font-medium">Date: {new Date().toLocaleDateString()}</span>
+              </div>
+            </div>
+            <button type="submit" className="bg-[#006097] text-white px-8 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-blue-100 hover:scale-[1.02] transition-transform flex items-center gap-2">
+              <Save size={16} /> Generate Job Card
+            </button>
+          </div>
+        </form>
       </div>
-    </form>
-      </div >
-    </div >
+    </div>
   );
 };
 
