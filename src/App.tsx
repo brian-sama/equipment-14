@@ -41,10 +41,13 @@ const App: React.FC = () => {
     console.log(`Task added to sync queue: ${action}`, payload);
   };
 
-  const processSyncQueue = useCallback(async () => {
+  const processSyncQueue = useCallback(async (shouldFetch: boolean = true) => {
     if (!navigator.onLine) return;
     const queue = getSyncQueue();
-    if (queue.length === 0) return;
+    if (queue.length === 0) {
+      if (shouldFetch) await fetchItems(false, true);
+      return;
+    }
 
     setLoading(true);
     let currentQueue = [...queue];
@@ -76,16 +79,15 @@ const App: React.FC = () => {
         }
 
         if (error) {
-          console.error(`Sync task ${task.action} failed:`, error);
-          // If it's a specific "already exists" error for ADD, we can consider it success
+          console.error(`Sync task ${task.action} failed for ID ${task.payload.id || task.payload.job_card_no}:`, error);
           if (task.action === 'ADD' && (error as any).code === '23505') {
             console.log("Item already exists in database, clearing from queue");
           } else {
-            break; // Stop and keep remaining in queue
+            console.warn("Stopping sync queue processing due to error.");
+            break;
           }
         }
 
-        // Remove successful task
         currentQueue = currentQueue.filter(t => t.id !== task.id);
         setSyncQueue(currentQueue);
       } catch (err) {
@@ -94,7 +96,7 @@ const App: React.FC = () => {
       }
     }
 
-    await fetchItems();
+    if (shouldFetch) await fetchItems(false, true);
     setLoading(false);
   }, []);
 
@@ -118,8 +120,14 @@ const App: React.FC = () => {
     };
   }, [processSyncQueue]);
 
-  const fetchItems = useCallback(async (isFirstLoad: boolean = false) => {
+  const fetchItems = useCallback(async (isFirstLoad: boolean = false, skipSync: boolean = false) => {
     if (!isFirstLoad) setLoading(true);
+
+    // If online and not skipped, process queue first
+    if (navigator.onLine && !isFirstLoad && !skipSync) {
+      await processSyncQueue(false);
+    }
+
     try {
       const { data, error } = await supabase
         .from('equipment')
@@ -233,15 +241,19 @@ const App: React.FC = () => {
     setItems([optimisticItem, ...items]);
 
     if (navigator.onLine) {
+      console.log("Online: Attempting Supabase insert...");
       const { error } = await supabase.from('equipment').insert([payload]);
       if (error) {
         console.error("Supabase insert error:", error);
+        console.error("Insert error details:", JSON.stringify(error, null, 2));
         addToSyncQueue('ADD', payload);
       } else {
-        // Refresh to get actual ID from database
+        console.log("Supabase insert successful.");
+        // Refresh to get actual data from database
         await fetchItems();
       }
     } else {
+      console.log("Offline: Adding to sync queue.");
       addToSyncQueue('ADD', payload);
     }
     setLoading(false);
