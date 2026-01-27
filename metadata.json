@@ -1,0 +1,5 @@
+{
+  "name": "Equipment Tracker",
+  "description": "A comprehensive equipment management system for tracking repairs, logging serial numbers, and generating printable labels for technical staff.",
+  "requestFramePermissions": []
+}
