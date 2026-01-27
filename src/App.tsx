@@ -136,37 +136,75 @@ const App: React.FC = () => {
 
       if (error) throw error;
 
-      if (data) {
-        const mappedData: Equipment[] = data.map((item: any) => {
-          // Ensure all dates are properly formatted
-          const receivedDate = item.received_date ? new Date(item.received_date).toISOString() : new Date().toISOString();
-          const fixedDate = item.fixed_date ? new Date(item.fixed_date).toISOString() : null;
 
+      // Map server data (if any)
+      const serverItems: Equipment[] = data ? data.map((item: any) => {
+        // Ensure all dates are properly formatted
+        const receivedDate = item.received_date ? new Date(item.received_date).toISOString() : new Date().toISOString();
+        const fixedDate = item.fixed_date ? new Date(item.fixed_date).toISOString() : null;
+
+        return {
+          id: item.id,
+          jobCardNo: item.job_card_no || 'N/A',
+          type: item.type || 'N/A',
+          serialNumber: item.serial_number || 'N/A',
+          officeNumber: item.office_number || 'N/A',
+          assignedTo: item.assigned_to || 'N/A',
+          loggedBy: item.logged_by as UserType || 'Admin',
+          receivedDate: receivedDate,
+          formattedReceivedDate: formatDateForDisplay(receivedDate),
+          fixedDate: fixedDate,
+          formattedFixedDate: formatDateForDisplay(fixedDate),
+          status: item.status as EquipmentStatus || EquipmentStatus.PENDING,
+          priority: (item.priority as PriorityType) || 'Medium',
+          osFirmware: item.os_firmware || 'N/A',
+          notes: item.notes || '',
+          technicianLogs: Array.isArray(item.technician_logs) ? item.technician_logs : [],
+          finalCondition: item.final_condition as FinalConditionType || null,
+          srNumber: item.sr_number || '',
+          owner: item.owner || ''
+        };
+      }) : [];
+
+      // Merge with pending items from sync queue
+      const queue = JSON.parse(localStorage.getItem('sync_queue') || '[]');
+      const pendingItems = queue
+        .filter((t: any) => t.action === 'ADD')
+        .map((t: any) => {
+          const item = t.payload;
           return {
             id: item.id,
-            jobCardNo: item.job_card_no || 'N/A',
-            type: item.type || 'N/A',
-            serialNumber: item.serial_number || 'N/A',
-            officeNumber: item.office_number || 'N/A',
-            assignedTo: item.assigned_to || 'N/A',
-            loggedBy: item.logged_by as UserType || 'Admin',
-            receivedDate: receivedDate,
-            formattedReceivedDate: formatDateForDisplay(receivedDate),
-            fixedDate: fixedDate,
-            formattedFixedDate: formatDateForDisplay(fixedDate),
-            status: item.status as EquipmentStatus || EquipmentStatus.PENDING,
-            priority: (item.priority as PriorityType) || 'Medium',
-            osFirmware: item.os_firmware || 'N/A',
-            notes: item.notes || '',
-            technicianLogs: Array.isArray(item.technician_logs) ? item.technician_logs : [],
-            finalCondition: item.final_condition as FinalConditionType || null,
-            srNumber: item.sr_number || '',
-            owner: item.owner || ''
-          };
+            jobCardNo: item.job_card_no,
+            type: item.type,
+            serialNumber: item.serial_number,
+            officeNumber: item.office_number,
+            assignedTo: item.assigned_to,
+            loggedBy: item.logged_by,
+            receivedDate: item.received_date,
+            formattedReceivedDate: formatDateForDisplay(item.received_date),
+            fixedDate: null,
+            formattedFixedDate: 'N/A',
+            status: item.status,
+            priority: item.priority,
+            osFirmware: item.os_firmware,
+            notes: item.notes,
+            technicianLogs: item.technician_logs || [],
+            finalCondition: item.final_condition,
+            srNumber: item.sr_number,
+            owner: item.owner
+          } as Equipment;
         });
-        setItems(mappedData);
-        localStorage.setItem('cached_items', JSON.stringify(mappedData));
-      }
+
+      // Deduplicate: Server items take precedence
+      const existingIds = new Set(serverItems.map(i => i.id));
+      const uniquePending = pendingItems.filter((i: Equipment) => !existingIds.has(i.id));
+
+      const finalItems = [...uniquePending, ...serverItems];
+      // Sort: Newest first
+      finalItems.sort((a, b) => new Date(b.receivedDate).getTime() - new Date(a.receivedDate).getTime());
+
+      setItems(finalItems);
+      localStorage.setItem('cached_items', JSON.stringify(finalItems));
     } catch (err) {
       console.error("Fetch error, using cache:", err);
       const cached = localStorage.getItem('cached_items');
