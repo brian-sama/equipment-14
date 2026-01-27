@@ -30,7 +30,7 @@ const EquipmentForm: React.FC<EquipmentFormProps> = ({ currentUser, onClose, onS
       alert("All fields marked with * are required.");
       return;
     }
-    
+
     // FIX: Format the data properly with timestamp
     const submissionData = {
       ...formData,
@@ -40,7 +40,7 @@ const EquipmentForm: React.FC<EquipmentFormProps> = ({ currentUser, onClose, onS
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
-    
+
     onSubmit(submissionData);
     onClose();
   };
@@ -53,17 +53,19 @@ const EquipmentForm: React.FC<EquipmentFormProps> = ({ currentUser, onClose, onS
             <h2 className="text-2xl font-black uppercase tracking-tight leading-none">Job Entry</h2>
             <p className="text-xs opacity-80 mt-1 uppercase font-bold tracking-widest">Reception Desk Log</p>
           </div>
-          <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-full transition-colors"><X size={24} /></button>
+          <button onClick={onClose} aria-label="Close modal" className="p-2 hover:bg-white/10 rounded-full transition-colors"><X size={24} /></button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-10 space-y-6 max-h-[75vh] overflow-y-auto scrollbar-hide">
+        <form onSubmit={handleSubmit} className="p-10 space-y-6 max-h-[75vh] overflow-y-auto pb-10">
           <div className="grid grid-cols-2 gap-6">
             <div>
               <label className="block text-[10px] font-black text-gray-400 uppercase mb-2 tracking-widest">Device Category *</label>
-              <select 
+              <select
+                aria-label="Device Category"
+                title="Select Device Category"
                 className="w-full bg-gray-50 border border-gray-200 rounded-2xl px-5 py-4 font-bold text-sm outline-none focus:ring-2 focus:ring-blue-500"
                 value={formData.type}
-                onChange={(e) => setFormData({...formData, type: e.target.value})}
+                onChange={(e) => setFormData({ ...formData, type: e.target.value })}
               >
                 {types.map(t => <option key={t} value={t}>{t}</option>)}
               </select>
@@ -75,10 +77,9 @@ const EquipmentForm: React.FC<EquipmentFormProps> = ({ currentUser, onClose, onS
                   <button
                     key={p}
                     type="button"
-                    onClick={() => setFormData({...formData, priority: p})}
-                    className={`flex-1 py-4 text-[10px] font-black uppercase rounded-2xl transition-all border ${
-                      formData.priority === p ? 'bg-gray-900 text-white border-gray-900' : 'bg-gray-50 text-gray-400 border-gray-100 hover:bg-gray-100'
-                    }`}
+                    onClick={() => setFormData({ ...formData, priority: p })}
+                    className={`flex-1 py-4 text-[10px] font-black uppercase rounded-2xl transition-all border ${formData.priority === p ? 'bg-gray-900 text-white border-gray-900' : 'bg-gray-50 text-gray-400 border-gray-100 hover:bg-gray-100'
+                      }`}
                   >
                     {p}
                   </button>
@@ -90,19 +91,21 @@ const EquipmentForm: React.FC<EquipmentFormProps> = ({ currentUser, onClose, onS
           <div className="grid grid-cols-2 gap-6">
             <div>
               <label className="block text-[10px] font-black text-gray-400 uppercase mb-2 tracking-widest">Serial Number *</label>
-              <input 
+              <input
                 type="text" required placeholder="S/N..."
                 className="w-full bg-gray-50 border border-gray-200 rounded-2xl px-5 py-4 font-bold text-sm outline-none focus:ring-2 focus:ring-blue-500"
                 value={formData.serialNumber}
-                onChange={(e) => setFormData({...formData, serialNumber: e.target.value})}
+                onChange={(e) => setFormData({ ...formData, serialNumber: e.target.value })}
               />
             </div>
             <div>
               <label className="block text-[10px] font-black text-gray-400 uppercase mb-2 tracking-widest">OS / Firmware *</label>
-              <select 
+              <select
+                aria-label="OS / Firmware"
+                title="Select OS / Firmware"
                 className="w-full bg-gray-50 border border-gray-200 rounded-2xl px-5 py-4 font-bold text-sm outline-none focus:ring-2 focus:ring-blue-500"
                 value={formData.osFirmware}
-                onChange={(e) => setFormData({...formData, osFirmware: e.target.value})}
+                onChange={(e) => setFormData({ ...formData, osFirmware: e.target.value })}
               >
                 {osOptions.map(os => <option key={os} value={os}>{os}</option>)}
               </select>
@@ -112,31 +115,31 @@ const EquipmentForm: React.FC<EquipmentFormProps> = ({ currentUser, onClose, onS
           <div className="grid grid-cols-2 gap-6">
             <div>
               <label className="block text-[10px] font-black text-gray-400 uppercase mb-2 tracking-widest">Office Location *</label>
-              <input 
+              <input
                 type="text" required placeholder="Room 402"
                 className="w-full bg-gray-50 border border-gray-200 rounded-2xl px-5 py-4 font-bold text-sm outline-none focus:ring-2 focus:ring-blue-500"
                 value={formData.officeNumber}
-                onChange={(e) => setFormData({...formData, officeNumber: e.target.value})}
+                onChange={(e) => setFormData({ ...formData, officeNumber: e.target.value })}
               />
             </div>
             <div>
               <label className="block text-[10px] font-black text-gray-400 uppercase mb-2 tracking-widest">Assigned Staff *</label>
-              <input 
+              <input
                 type="text" required placeholder="User Name"
                 className="w-full bg-gray-50 border border-gray-200 rounded-2xl px-5 py-4 font-bold text-sm outline-none focus:ring-2 focus:ring-blue-500"
                 value={formData.assignedTo}
-                onChange={(e) => setFormData({...formData, assignedTo: e.target.value})}
+                onChange={(e) => setFormData({ ...formData, assignedTo: e.target.value })}
               />
             </div>
           </div>
 
           <div>
             <label className="block text-[10px] font-black text-gray-400 uppercase mb-2 tracking-widest">Detailed Issue</label>
-            <textarea 
+            <textarea
               rows={3} placeholder="Describe the fault..."
               className="w-full bg-gray-50 border border-gray-200 rounded-2xl px-5 py-4 font-bold text-sm outline-none focus:ring-2 focus:ring-blue-500 resize-none"
               value={formData.notes}
-              onChange={(e) => setFormData({...formData, notes: e.target.value})}
+              onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
             />
           </div>
 
