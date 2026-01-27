@@ -159,7 +159,9 @@ const App: React.FC = () => {
             osFirmware: item.os_firmware || 'N/A',
             notes: item.notes || '',
             technicianLogs: Array.isArray(item.technician_logs) ? item.technician_logs : [],
-            finalCondition: item.final_condition as FinalConditionType || null
+            finalCondition: item.final_condition as FinalConditionType || null,
+            srNumber: item.sr_number || '',
+            owner: item.owner || ''
           };
         });
         setItems(mappedData);
@@ -214,7 +216,9 @@ const App: React.FC = () => {
       final_condition: null,
       received_date: receivedDate,
       created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
+      updated_at: new Date().toISOString(),
+      sr_number: newItem.srNumber,
+      owner: newItem.owner
     };
 
     // Optimistic Update with formatted dates
@@ -235,7 +239,9 @@ const App: React.FC = () => {
       osFirmware: newItem.osFirmware,
       notes: newItem.notes,
       technicianLogs: [],
-      finalCondition: null
+      finalCondition: null,
+      srNumber: newItem.srNumber,
+      owner: newItem.owner
     };
 
     setItems([optimisticItem, ...items]);

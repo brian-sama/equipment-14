@@ -31,6 +31,8 @@ export interface Equipment {
   notes?: string;
   technicianLogs: TechnicianLog[];
   finalCondition?: FinalConditionType;
+  srNumber?: string;
+  owner?: string;
 }
 
 export type TabType = 'All' | 'Received' | 'Fixed';
