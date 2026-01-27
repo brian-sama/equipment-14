@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Equipment, TechnicianLog, FinalConditionType } from '../types';
-import { Printer, X, Save, AlertCircle } from 'lucide-react';
+import { Printer, X, Save } from 'lucide-react';
 
 interface WorkOrderProps {
   item: Equipment;
@@ -41,8 +41,7 @@ const WorkOrder: React.FC<WorkOrderProps> = ({
   const addLog = () => {
     if (newLog.trim()) {
       const logEntry: TechnicianLog = {
-        id: Date.now().toString(),
-        timestamp: new Date().toISOString(),
+        date: new Date().toISOString(),
         technician: technicianName || 'Technician',
         action: newLog.trim()
       };
@@ -54,27 +53,22 @@ const WorkOrder: React.FC<WorkOrderProps> = ({
   const handleSave = () => {
     if (onSaveJob && condition) {
       onSaveJob(logs, condition);
-      if (onClose) onClose();
     }
   };
 
-  // Use absolute path for Netlify - adjust based on your deployment
-  const coatOfArmsPath = '/bulawayo-coat-of-arms.png'; // For Netlify
+  const coatOfArmsPath = '/bulawayo-coat-of-arms.png';
 
   return (
     <div className="bg-white rounded-[40px] shadow-2xl overflow-hidden w-full max-w-6xl">
       {/* Header with logo */}
       <div className="bg-gradient-to-r from-[#006097] to-[#0088cc] p-10 flex items-center justify-between">
         <div className="flex items-center gap-6">
-          {/* City Logo */}
           <div className="bg-white p-3 rounded-2xl shadow-lg">
             <img
               src={coatOfArmsPath}
               alt="City Logo"
               className="w-20 h-20 object-contain"
               onError={(e) => {
-                console.error("Failed to load image:", coatOfArmsPath);
-                // Fallback to a div if image fails to load
                 const target = e.target as HTMLImageElement;
                 target.style.display = 'none';
                 target.parentElement!.innerHTML = '<div class="w-20 h-20 bg-gray-200 rounded-2xl flex items-center justify-center text-gray-400 text-xs">LOGO</div>';
@@ -102,8 +96,8 @@ const WorkOrder: React.FC<WorkOrderProps> = ({
       <div className="overflow-y-auto max-h-[calc(100vh-280px)] pb-10">
         <div className="p-10 grid grid-cols-1 lg:grid-cols-3 gap-10">
           {/* Left Column - Equipment Details */}
-          <div className="col-span-2 space-y-8">
-            <div className="grid grid-cols-2 gap-6">
+          <div className="lg:col-span-2 space-y-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="bg-gray-50 p-6 rounded-2xl">
                 <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Serial Number</p>
                 <p className="text-2xl font-black text-gray-900 mt-2">{item.serialNumber}</p>
@@ -127,7 +121,7 @@ const WorkOrder: React.FC<WorkOrderProps> = ({
               <p className="text-lg font-bold text-gray-900 whitespace-pre-wrap">{item.notes || 'No detailed description provided.'}</p>
             </div>
 
-            <div className="grid grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="bg-gray-50 p-6 rounded-2xl">
                 <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">OS / Firmware</p>
                 <p className="text-lg font-black text-gray-900 mt-2">{item.osFirmware}</p>
@@ -184,11 +178,11 @@ const WorkOrder: React.FC<WorkOrderProps> = ({
                   </div>
 
                   <div className="space-y-3 max-h-40 overflow-y-auto">
-                    {logs.map(log => (
-                      <div key={log.id} className="bg-white p-3 rounded-xl border border-amber-100">
+                    {logs.map((log, idx) => (
+                      <div key={idx} className="bg-white p-3 rounded-xl border border-amber-100">
                         <p className="text-sm font-bold text-gray-900">{log.action}</p>
                         <p className="text-[10px] text-gray-400 mt-1">
-                          {formatDate(log.timestamp)} • {log.technician}
+                          {formatDate(log.date)} • {log.technician}
                         </p>
                       </div>
                     ))}
@@ -196,14 +190,14 @@ const WorkOrder: React.FC<WorkOrderProps> = ({
 
                   <div className="mt-6">
                     <p className="text-[10px] font-black text-amber-600 uppercase tracking-widest mb-3">Final Condition</p>
-                    <div className="flex gap-2">
-                      {(['Fixed', 'Unfixable', 'Parts Ordered', 'Waiting for Parts'] as FinalConditionType[]).map(opt => (
+                    <div className="flex flex-wrap gap-2">
+                      {(['Working', 'Partially', 'Dead'] as FinalConditionType[]).map(opt => (
                         <button
-                          key={opt}
+                          key={opt || 'null'}
                           onClick={() => setCondition(opt)}
-                          className={`flex-1 py-3 text-[10px] font-black uppercase rounded-xl transition-all ${condition === opt ? 'bg-amber-600 text-white' : 'bg-white text-amber-600 border border-amber-200 hover:bg-amber-50'}`}
+                          className={`flex-1 min-w-[80px] py-3 text-[10px] font-black uppercase rounded-xl transition-all ${condition === opt ? 'bg-amber-600 text-white' : 'bg-white text-amber-600 border border-amber-200 hover:bg-amber-50'}`}
                         >
-                          {opt}
+                          {opt || 'N/A'}
                         </button>
                       ))}
                     </div>
@@ -222,29 +216,30 @@ const WorkOrder: React.FC<WorkOrderProps> = ({
             )}
           </div>
         </div>
+      </div>
 
-        {/* Footer */}
-        <div className="bg-gray-900 p-8 flex justify-between items-center">
-          <div className="text-white">
-            <p className="text-sm opacity-80">Logged by: <span className="font-bold">{item.loggedBy}</span></p>
-            <p className="text-xs opacity-60 mt-1">System generated work order • Do not discard</p>
-          </div>
+      {/* Footer */}
+      <div className="bg-gray-900 p-8 flex justify-between items-center">
+        <div className="text-white">
+          <p className="text-sm opacity-80">Logged by: <span className="font-bold">{item.loggedBy}</span></p>
+          <p className="text-xs opacity-60 mt-1">System generated work order • Do not discard</p>
+        </div>
 
-          <div className="flex gap-4">
-            {onClose && (
-              <button onClick={onClose} aria-label="Close modal" className="bg-gray-700 text-white px-6 py-3 rounded-xl font-bold hover:bg-gray-600 transition-colors">
-                Close
-              </button>
-            )}
-            {onPrint && (
-              <button onClick={onPrint} aria-label="Print work order" className="bg-blue-600 text-white px-6 py-3 rounded-xl font-bold flex items-center gap-2 hover:bg-blue-700 transition-colors">
-                <Printer size={18} /> Print Work Order
-              </button>
-            )}
-          </div>
+        <div className="flex gap-4">
+          {onClose && (
+            <button onClick={onClose} aria-label="Close modal" className="bg-gray-700 text-white px-6 py-3 rounded-xl font-bold hover:bg-gray-600 transition-colors">
+              Close
+            </button>
+          )}
+          {onPrint && (
+            <button onClick={onPrint} aria-label="Print work order" className="bg-blue-600 text-white px-6 py-3 rounded-xl font-bold flex items-center gap-2 hover:bg-blue-700 transition-colors">
+              <Printer size={18} /> Print Work Order
+            </button>
+          )}
         </div>
       </div>
-      );
+    </div>
+  );
 };
 
-      export default WorkOrder;
+export default WorkOrder;
