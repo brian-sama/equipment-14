@@ -146,8 +146,7 @@ const AppContent: React.FC = () => {
         .from('equipment')
         .update({
           technician_logs: logs,
-          final_condition: condition,
-          updated_at: new Date().toISOString()
+          final_condition: condition
         })
         .eq('id', id);
 
@@ -169,8 +168,7 @@ const AppContent: React.FC = () => {
         .from('equipment')
         .update({
           status: EquipmentStatus.FIXED,
-          fixed_date: fixedDate,
-          updated_at: new Date().toISOString()
+          fixed_date: fixedDate
         })
         .eq('id', id);
 
