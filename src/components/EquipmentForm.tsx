@@ -28,9 +28,16 @@ const EquipmentForm: React.FC<EquipmentFormProps> = ({ currentUser, onClose, onS
 
     setIsFetching(true);
     try {
-      // Replace with your actual inventory app URL
-      const response = await fetch(`https://your-inventory-app.netlify.app/api/external/asset/${formData.serialNumber}`, {
-        headers: { 'x-api-key': 'BCC_REPAIRS_SYNC_2024' }
+      const inventoryApiUrl = import.meta.env.VITE_INVENTORY_API_URL;
+      const inventoryApiKey = import.meta.env.VITE_INVENTORY_API_KEY;
+
+      if (!inventoryApiUrl) {
+        console.warn("Inventory API URL is not set in environment variables");
+        return;
+      }
+
+      const response = await fetch(`${inventoryApiUrl}/api/external/asset/${formData.serialNumber}`, {
+        headers: { 'x-api-key': inventoryApiKey || '' }
       });
       const data = await response.json();
       if (data.success) {

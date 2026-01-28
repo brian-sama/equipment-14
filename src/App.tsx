@@ -91,15 +91,15 @@ const App: React.FC = () => {
     setLoading(true);
 
     try {
-        // Generate Job Card Number based on current count (Note: This is not concurrency safe but matches previous logic)
-        const count = items.length;
-        const currentYear = new Date().getFullYear().toString().slice(-2);
-        const jobCardNo = `COMETZ${currentYear}/${String(count + 1).padStart(5, '0')}`;
-        
-        const receivedDate = new Date().toISOString();
-        const tempId = crypto.randomUUID();
+      // Generate Job Card Number based on current count (Note: This is not concurrency safe but matches previous logic)
+      const count = items.length;
+      const currentYear = new Date().getFullYear().toString().slice(-2);
+      const jobCardNo = `COMETZ${currentYear}/${String(count + 1).padStart(5, '0')}`;
 
-        const payload = {
+      const receivedDate = new Date().toISOString();
+      const tempId = crypto.randomUUID();
+
+      const payload = {
         id: tempId,
         job_card_no: jobCardNo,
         type: newItem.type,
@@ -118,63 +118,63 @@ const App: React.FC = () => {
         updated_at: new Date().toISOString(),
         sr_number: newItem.srNumber,
         owner: newItem.owner
-        };
+      };
 
-        const { error } = await supabase.from('equipment').insert([payload]);
+      const { error } = await supabase.from('equipment').insert([payload]);
 
-        if (error) {
+      if (error) {
         throw error;
-        }
+      }
 
-        await fetchItems();
+      await fetchItems();
     } catch (error) {
-        console.error("Error adding item:", error);
-        alert("Failed to save the new job. Please try again.");
+      console.error("Error adding item:", error);
+      alert("Failed to save the new job. Please try again.");
     } finally {
-        setLoading(false);
+      setLoading(false);
     }
   };
 
   const updateJobDetails = async (id: string, logs: TechnicianLog[], condition: FinalConditionType) => {
     try {
-        const { error } = await supabase
-            .from('equipment')
-            .update({
-            technician_logs: logs,
-            final_condition: condition,
-            updated_at: new Date().toISOString()
-            })
-            .eq('id', id);
+      const { error } = await supabase
+        .from('equipment')
+        .update({
+          technician_logs: logs,
+          final_condition: condition,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', id);
 
-        if (error) throw error;
-        
-        await fetchItems();
-        return true;
+      if (error) throw error;
+
+      await fetchItems();
+      return true;
     } catch (error) {
-        console.error("Error updating job:", error);
-        alert("Failed to update job details.");
-        return false;
+      console.error("Error updating job:", error);
+      alert("Failed to update job details.");
+      return false;
     }
   };
 
   const markAsFixed = async (id: string) => {
     try {
-        const fixedDate = new Date().toISOString();
-        const { error } = await supabase
-            .from('equipment')
-            .update({
-            status: EquipmentStatus.FIXED,
-            fixed_date: fixedDate,
-            updated_at: new Date().toISOString()
-            })
-            .eq('id', id);
+      const fixedDate = new Date().toISOString();
+      const { error } = await supabase
+        .from('equipment')
+        .update({
+          status: EquipmentStatus.FIXED,
+          fixed_date: fixedDate,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', id);
 
-        if (error) throw error;
+      if (error) throw error;
 
-        await fetchItems();
+      await fetchItems();
     } catch (error) {
-        console.error("Error completing job:", error);
-        alert("Failed to mark job as fixed.");
+      console.error("Error completing job:", error);
+      alert("Failed to mark job as fixed.");
     }
   };
 
