@@ -1,9 +1,12 @@
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { UserType, Equipment, EquipmentStatus, PriorityType, TechnicianLog, FinalConditionType } from './types';
 import Login from './components/Login';
 import Dashboard from './components/Dashboard';
 import Preloader from './components/Preloader';
-import { supabase } from './supabaseClient';
+import ErrorBoundary from './components/ErrorBoundary';
+import { supabase, isSupabaseConfigured } from './supabaseClient';
+import { AlertTriangle } from 'lucide-react';
 
 // Date formatting utility
 const formatDateForDisplay = (dateString: string | null | undefined): string => {
@@ -23,7 +26,7 @@ const formatDateForDisplay = (dateString: string | null | undefined): string => 
   }
 };
 
-const App: React.FC = () => {
+const AppContent: React.FC = () => {
   const [currentUser, setCurrentUser] = useState<UserType | null>(null);
   const [items, setItems] = useState<Equipment[]>([]);
   const [loading, setLoading] = useState(false);
@@ -72,7 +75,11 @@ const App: React.FC = () => {
       setItems(serverItems);
     } catch (err) {
       console.error("Fetch error:", err);
-      alert("Failed to fetch records from the database. Please check your internet connection.");
+      // Don't show alert on first load if it fails - likely auth or network issue that will be caught by other mechanisms
+      // or simply empty state
+      if (!isFirstLoad) {
+        alert("Failed to fetch records from the database. Please check your internet connection.");
+      }
     } finally {
       setLoading(false);
       if (isFirstLoad) setTimeout(() => setIsInitializing(false), 1000);
@@ -114,8 +121,6 @@ const App: React.FC = () => {
         technician_logs: [],
         final_condition: null,
         received_date: receivedDate,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
         sr_number: newItem.srNumber,
         owner: newItem.owner
       };
@@ -203,6 +208,44 @@ const App: React.FC = () => {
         </div>
       )}
     </div>
+  );
+};
+
+const App: React.FC = () => {
+  // Check configuration before anything else
+  if (!isSupabaseConfigured()) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 p-6">
+        <div className="max-w-md w-full bg-white rounded-3xl shadow-xl p-8 border border-yellow-200 text-center">
+          <div className="flex justify-center mb-6">
+            <div className="bg-yellow-50 p-4 rounded-full">
+              <AlertTriangle size={48} className="text-yellow-600" />
+            </div>
+          </div>
+
+          <h1 className="text-xl font-bold text-gray-900 mb-2">Configuration Missing</h1>
+          <p className="text-gray-500 mb-6 text-sm">
+            The application could not start because the Supabase configuration is missing.
+          </p>
+
+          <div className="bg-gray-100 p-4 rounded-xl text-left text-xs text-gray-600 font-mono mb-6">
+            <p>Req Vars:</p>
+            <p>- VITE_SUPABASE_URL</p>
+            <p>- VITE_SUPABASE_ANON_KEY</p>
+          </div>
+
+          <p className="text-xs text-gray-400">
+            Please check your Netlify environment settings.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <ErrorBoundary>
+      <AppContent />
+    </ErrorBoundary>
   );
 };
 
